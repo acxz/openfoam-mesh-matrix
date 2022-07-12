@@ -1,9 +1,10 @@
+using Metis
 using Plots
 using SparseArrays
 
-#unicodeplots()
+unicodeplots()
 #pyplot()
-plotlyjs()
+#plotlyjs()
 
 function read_bt_paran(file)
     fh = open(file)
@@ -66,8 +67,8 @@ end
 # Read in ascii with multiple values
 
 #casedir = "sampleMeshes/polyMesh/"
-#casedir = "sampleMeshes/polyMesh-bin/"
-casedir = "sampleMeshes/polyMesh-comp/"
+casedir = "sampleMeshes/polyMesh-bin/"
+#casedir = "sampleMeshes/polyMesh-comp/"
 
 neighbour_file = casedir * "neighbour"
 owner_file = casedir * "owner"
@@ -83,4 +84,17 @@ row_idx_vec = [neighbour_vec; owner_vec; idx_vec]
 col_idx_vec = [owner_vec; neighbour_vec; idx_vec]
 
 mesh_matrix = sparse(row_idx_vec, col_idx_vec, 1)
+
+perm, iperm = Metis.permutation(mesh_matrix)
+
 spy(mesh_matrix)
+spy(mesh_matrix[perm, perm])
+
+lu_og_u = lu(mesh_matrix).U
+lu_perm_u = lu(mesh_matrix[perm, perm]).U
+
+spy(lu_og_u)
+spy(lu_perm_u)
+
+println(nnz(lu_og_u))
+println(nnz(lu_perm_u))
